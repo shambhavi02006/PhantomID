@@ -111,3 +111,4 @@ This repository includes a native **`render.yaml`** specification.
 
 ## 📄 License
 MIT License. Built with ❤️ for Hacktoberfest 2026.
+

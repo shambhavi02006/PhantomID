@@ -257,6 +257,38 @@ def update_profile_scan(profile_id, verdict, reason, anomaly_score):
         conn.close()
 
 
+def insert_profile(profile):
+    """Inserts a new profile into the active database and returns its assigned ID."""
+    if is_mongo_available():
+        from pymongo import MongoClient
+        client = MongoClient(MONGO_URI)
+        db = client[MONGO_DB_NAME]
+        highest = list(db["users"].find({}, {"id": 1}).sort("id", -1).limit(1))
+        next_id = (highest[0]["id"] + 1) if highest else 1
+        profile["id"] = next_id
+        db["users"].insert_one(dict(profile))
+        return next_id
+    else:
+        init_sqlite()
+        conn = get_sqlite_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT MAX(id) as max_id FROM users")
+        row = cursor.fetchone()
+        next_id = (row["max_id"] or 0) + 1
+        profile["id"] = next_id
+        cursor.execute("""
+            INSERT INTO users (id, name, age, email, employment_years, account_balance, credit_score, status, verdict, reason, anomaly_score)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            next_id, profile["name"], profile["age"], profile["email"], profile["employment_years"],
+            profile["account_balance"], profile["credit_score"], profile.get("status", "Unscanned"),
+            profile.get("verdict"), profile.get("reason"), profile.get("anomaly_score", 0.0)
+        ))
+        conn.commit()
+        conn.close()
+        return next_id
+
+
 if __name__ == "__main__":
     result = seed_database()
     print(f"[PhantomID Data Engine] {result}")

@@ -7,12 +7,21 @@ createApp({
       storageEngine: "Detecting...",
       loading: false,
       resetting: false,
+      injecting: false,
       summary: null,
       selectedProfile: null,
       audioEnabled: true,
       audioPlaying: false,
       audioPlayer: null,
-      errorMessage: null
+      errorMessage: null,
+      newProfile: {
+        name: "",
+        email: "",
+        age: 28,
+        employment_years: 6,
+        account_balance: 55000,
+        credit_score: 720
+      }
     };
   },
   computed: {
@@ -89,6 +98,85 @@ createApp({
       }
     },
 
+    openInjectModal() {
+      if (!this.newProfile.name) {
+        this.loadPreset("child_prodigy");
+      }
+      const modalEl = document.getElementById("injectModal");
+      if (modalEl && window.bootstrap) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+      }
+    },
+
+    loadPreset(type) {
+      if (type === "child_prodigy") {
+        this.newProfile = {
+          name: "Julian Vance-Ross",
+          email: "julian.ross@ventureseed.io",
+          age: 18,
+          employment_years: 15,
+          account_balance: 185000,
+          credit_score: 790
+        };
+      } else if (type === "senior_doc") {
+        this.newProfile = {
+          name: "Dr. Alistair Finch",
+          email: "afinch@stmarys-medical.org",
+          age: 54,
+          employment_years: 28,
+          account_balance: 310000,
+          credit_score: 810
+        };
+      } else if (type === "delinquent_prime") {
+        this.newProfile = {
+          name: "Chloe Bennett-Stark",
+          email: "c.bennett@starkholdings.net",
+          age: 41,
+          employment_years: 19,
+          account_balance: -24500,
+          credit_score: 795
+        };
+      }
+    },
+
+    async injectProfile() {
+      this.injecting = true;
+      this.errorMessage = null;
+
+      try {
+        const res = await fetch("/api/profiles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(this.newProfile)
+        });
+        const data = await res.json();
+
+        if (data.status === "success") {
+          this.profiles = data.profiles;
+
+          // Close modal
+          const modalEl = document.getElementById("injectModal");
+          if (modalEl && window.bootstrap) {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+          }
+
+          // Trigger audio if injected profile is a ghost
+          if (data.profile.verdict === "Ghost" && this.audioEnabled) {
+            this.playAudioAlert(1);
+          }
+        } else {
+          this.errorMessage = "Failed to inject identity.";
+        }
+      } catch (err) {
+        console.error("Inject error:", err);
+        this.errorMessage = "Failed to communicate with API.";
+      } finally {
+        this.injecting = false;
+      }
+    },
+
     async playAudioAlert(ghostCount) {
       this.audioPlaying = true;
       try {
@@ -129,7 +217,7 @@ createApp({
       this.selectedProfile = profile;
       const modalEl = document.getElementById("inspectModal");
       if (modalEl && window.bootstrap) {
-        const modal = new bootstrap.Modal(modalEl);
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         modal.show();
       }
     },
@@ -150,4 +238,3 @@ createApp({
     this.fetchProfiles();
   }
 }).mount("#app");
-

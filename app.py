@@ -8,6 +8,7 @@ from seed_data import (
     seed_database,
     fetch_profiles,
     update_profile_scan,
+    insert_profile,
     is_mongo_available
 )
 from detectors.tabpfn_engine import calculate_tabular_anomalies
@@ -60,6 +61,66 @@ def get_profiles():
         "storage_engine": storage_engine,
         "count": len(profiles),
         "profiles": profiles
+    })
+
+
+@app.route("/api/profiles", methods=["POST"])
+def add_custom_profile():
+    """
+    Injects a custom financial profile and immediately evaluates it
+    through the Dual-Engine AI (TabPFN + Google Gemma 2).
+    """
+    data = request.get_json(silent=True) or {}
+    name = data.get("name", "").strip() or "Custom Subject"
+    email = data.get("email", "").strip() or f"{name.lower().replace(' ', '.')}@custombank.com"
+    age = int(data.get("age", 30))
+    employment_years = int(data.get("employment_years", 5))
+    account_balance = float(data.get("account_balance", 50000.0))
+    credit_score = int(data.get("credit_score", 700))
+
+    new_profile = {
+        "name": name,
+        "email": email,
+        "age": age,
+        "employment_years": employment_years,
+        "account_balance": account_balance,
+        "credit_score": credit_score,
+        "status": "Unscanned",
+        "verdict": None,
+        "reason": None,
+        "anomaly_score": 0.0
+    }
+
+    new_id = insert_profile(new_profile)
+    new_profile["id"] = new_id
+
+    # Fetch all profiles including new one for holistic analysis
+    all_profiles, storage_engine = fetch_profiles()
+
+    # Run Dual AI Engine on the dataset
+    tabpfn_output = calculate_tabular_anomalies(all_profiles)
+    tabpfn_score = tabpfn_output["scores"].get(new_id, 0.05)
+
+    gemma_output = run_gemma_reasoning(all_profiles, tabpfn_output["scores"])
+    v_info = gemma_output["verdicts"].get(new_id, {"verdict": "Real", "reason": "Verified identity."})
+    verdict = v_info.get("verdict", "Real")
+    reason = v_info.get("reason", "Verified identity.")
+
+    # Update new profile in DB
+    update_profile_scan(new_id, verdict, reason, tabpfn_score)
+    new_profile["status"] = "Scanned"
+    new_profile["verdict"] = verdict
+    new_profile["reason"] = reason
+    new_profile["anomaly_score"] = tabpfn_score
+
+    # Re-fetch all updated profiles
+    updated_profiles, _ = fetch_profiles()
+
+    return jsonify({
+        "status": "success",
+        "message": f"Identity #{new_id} ({name}) injected and audited.",
+        "profile": new_profile,
+        "profiles": updated_profiles
     })
 
 
