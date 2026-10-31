@@ -12,7 +12,7 @@ from seed_data import (
     is_mongo_available
 )
 from detectors.tabpfn_engine import calculate_tabular_anomalies
-from detectors.gemma_engine import run_gemma_reasoning
+from detectors.gemma_engine import run_gemma_reasoning, audit_multimodal_profile
 
 load_dotenv()
 
@@ -97,14 +97,14 @@ def add_custom_profile():
     # Fetch all profiles including new one for holistic analysis
     all_profiles, storage_engine = fetch_profiles()
 
-    # Run Dual AI Engine on the dataset
+    # Run Dual AI Engine on the dataset (TabPFN + Gemma Multimodal Vision)
     tabpfn_output = calculate_tabular_anomalies(all_profiles)
     tabpfn_score = tabpfn_output["scores"].get(new_id, 0.05)
 
-    gemma_output = run_gemma_reasoning(all_profiles, tabpfn_output["scores"])
-    v_info = gemma_output["verdicts"].get(new_id, {"verdict": "Real", "reason": "Verified identity."})
-    verdict = v_info.get("verdict", "Real")
-    reason = v_info.get("reason", "Verified identity.")
+    document_image = data.get("document_image")
+    audit_res = audit_multimodal_profile(new_profile, image_data=document_image, tabpfn_score=tabpfn_score)
+    verdict = audit_res.get("verdict", "Real")
+    reason = audit_res.get("reason", "Verified identity.")
 
     # Update new profile in DB
     update_profile_scan(new_id, verdict, reason, tabpfn_score)

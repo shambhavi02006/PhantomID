@@ -20,7 +20,8 @@ createApp({
         age: 28,
         employment_years: 6,
         account_balance: 55000,
-        credit_score: 720
+        credit_score: 720,
+        document_image: null
       }
     };
   },
@@ -135,9 +136,55 @@ createApp({
           age: 41,
           employment_years: 19,
           account_balance: -24500,
-          credit_score: 795
+          credit_score: 795,
+          document_image: null
         };
       }
+    },
+
+    handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        this.newProfile.document_image = uploadEvent.target.result;
+      };
+      reader.readAsDataURL(file);
+    },
+
+    attachSampleDoc(type) {
+      if (type === "license") {
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="380" height="230" viewBox="0 0 380 230">
+          <rect width="380" height="230" rx="14" fill="#0284c7" />
+          <rect x="8" y="8" width="364" height="214" rx="10" fill="#ffffff" />
+          <rect x="8" y="8" width="364" height="42" fill="#0284c7" />
+          <text x="24" y="34" font-family="monospace" font-size="16" font-weight="bold" fill="#ffffff">STATE DRIVER LICENSE</text>
+          <rect x="24" y="60" width="85" height="110" rx="6" fill="#cbd5e1" stroke="#94a3b8" />
+          <circle cx="66" cy="100" r="24" fill="#64748b" />
+          <path d="M 38 155 Q 66 125 94 155 Z" fill="#64748b" />
+          <text x="125" y="82" font-family="sans-serif" font-size="13" font-weight="bold" fill="#0f172a">NAME: ${this.newProfile.name || 'JULIAN ROSS'}</text>
+          <text x="125" y="104" font-family="sans-serif" font-size="12" fill="#334155">DOB: 04/18/2006 (AGE 18)</text>
+          <text x="125" y="126" font-family="sans-serif" font-size="12" fill="#334155">EXP: 04/18/2028</text>
+          <text x="125" y="148" font-family="monospace" font-size="11" fill="#dc2626">DL: D89234190-TX</text>
+        </svg>`;
+        this.newProfile.document_image = "data:image/svg+xml;base64," + btoa(svg);
+      } else {
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="380" height="230" viewBox="0 0 380 230">
+          <rect width="380" height="230" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+          <text x="20" y="32" font-family="sans-serif" font-size="16" font-weight="bold" fill="#0f172a">CONFIDENTIAL EARNINGS STATEMENT</text>
+          <line x1="20" y1="42" x2="360" y2="42" stroke="#cbd5e1" stroke-width="2" />
+          <text x="20" y="70" font-family="monospace" font-size="12" fill="#334155">EMPLOYEE: ${this.newProfile.name || 'JULIAN ROSS'}</text>
+          <text x="20" y="95" font-family="monospace" font-size="12" fill="#334155">YTD TENURE: ${this.newProfile.employment_years || 15} YEARS CONTINUOUS</text>
+          <text x="20" y="120" font-family="monospace" font-size="12" fill="#15803d">NET PAY: $12,450.00 / BI-WEEKLY</text>
+          <rect x="20" y="140" width="340" height="40" fill="#fee2e2" stroke="#ef4444" rx="4" />
+          <text x="30" y="165" font-family="monospace" font-size="11" font-weight="bold" fill="#b91c1c">AUDIT FLAG: PAYROLL SSN UNMATCHED</text>
+        </svg>`;
+        this.newProfile.document_image = "data:image/svg+xml;base64," + btoa(svg);
+      }
+    },
+
+    removeDoc() {
+      this.newProfile.document_image = null;
     },
 
     async injectProfile() {
