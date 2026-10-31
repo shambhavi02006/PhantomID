@@ -64,6 +64,17 @@ def run_gemma_reasoning(profiles, tabpfn_scores=None):
     }
 
 
+def _get_gemma_model():
+    """Selects the official Google DeepMind Gemma 4 model via the Gemini API."""
+    import google.generativeai as genai
+    for candidate in ["gemma-4-26b-a4b-it", "gemma-4-31b-it", "gemini-2.5-flash"]:
+        try:
+            return genai.GenerativeModel(candidate)
+        except Exception:
+            continue
+    return genai.GenerativeModel("gemini-2.5-flash")
+
+
 def audit_multimodal_profile(profile, image_data=None, tabpfn_score=0.0):
     """
     Audits a single profile with an OPTIONAL attached ID document or paystub image.
@@ -77,7 +88,7 @@ def audit_multimodal_profile(profile, image_data=None, tabpfn_score=0.0):
             import google.generativeai as genai
             from PIL import Image
 
-            model = genai.GenerativeModel("gemini-2.0-flash")
+            model = _get_gemma_model()
 
             prompt = f"""You are a Senior Fintech Fraud Investigator inspecting a synthetic identity fraud suspect.
 Review this financial profile:
@@ -157,7 +168,7 @@ INSPECTION GOAL:
 def _call_gemini_api_text(profiles, tabpfn_scores):
     """Calls Gemini API for text-based batch audit."""
     import google.generativeai as genai
-    model = genai.GenerativeModel("gemini-2.0-flash")
+    model = _get_gemma_model()
 
     clean_profiles = []
     for p in profiles:
