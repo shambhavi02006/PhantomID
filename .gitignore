@@ -1,0 +1,18 @@
+# Environment secrets (NEVER commit secrets!)
+.env
+
+# Python byte-code and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+env/
+ENV/
+
+# macOS metadata
+.DS_Store
+
+# IDE configs
+.vscode/
+.idea/

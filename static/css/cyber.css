@@ -1,0 +1,224 @@
+/* Cyber-Fintech High-Contrast Theme for PhantomID */
+:root {
+  --bg-primary: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card-border: #cbd5e1;
+  --accent-cyan: #0284c7;
+  --accent-green: #16a34a;
+  --accent-crimson: #dc2626;
+  --accent-gold: #d97706;
+  --text-primary: #0f172a;
+  /* Solid Deep Black/Slate */
+  --text-secondary: #475569;
+  /* Crisp Dark Slate */
+  --text-muted: #64748b;
+  /* Readable Slate Muted */
+  --ghost-red-glow: rgba(220, 38, 38, 0.15);
+}
+
+body {
+  background-color: var(--bg-primary);
+  background-image:
+  radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.08) 0px, transparent 50%),
+  radial-gradient(at 100% 100%, rgba(220, 38, 38, 0.06) 0px, transparent 50%),
+  linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+}
+
+/* Glassmorphism Card (Crisp High-Contrast White Surface) */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--bg-card-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+  color: var(--text-primary);
+}
+
+/* Header & Glow */
+.brand-glow {
+  color: #0284c7;
+  text-shadow: 0 0 12px rgba(2, 132, 199, 0.3);
+}
+
+.ghost-text-glow {
+  color: #dc2626;
+  text-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
+}
+
+/* Table Styling - High Contrast */
+.table-cyber {
+  color: #0f172a;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+}
+
+.table-cyber thead th {
+  background: #e2e8f0;
+  border: none;
+  color: #1e293b;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+}
+
+.table-cyber tbody tr {
+  background: #ffffff;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.table-cyber tbody tr td {
+  padding: 14px 16px;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+  color: #0f172a !important;
+  /* Pure visible black */
+  background: #ffffff;
+}
+
+.table-cyber tbody tr td:first-child {
+  border-left: 1px solid #e2e8f0;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.table-cyber tbody tr td:last-child {
+  border-right: 1px solid #e2e8f0;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+
+  .table-cyber tbody tr:hover td {
+    background: #f8fafc;
+  }
+
+  /* GHOST ROW HIGHLIGHT */
+  .row-ghost {
+    border-left: 5px solid #dc2626 !important;
+  }
+
+  .row-ghost td {
+    background: #fff1f2 !important;
+    border-color: #fecdd3 !important;
+    color: #0f172a !important;
+  }
+
+  .row-ghost:hover td {
+    background: #ffe4e6 !important;
+  }
+
+  /* REAL ROW */
+  .row-real {
+    border-left: 5px solid #16a34a !important;
+  }
+
+
+    .row-real td {
+      background: #f0fdf4 !important;
+      border-color: #bbf7d0 !important;
+      color: #0f172a !important;
+    }
+
+    .row-real:hover td {
+      background: #dcfce7 !important;
+    }
+
+    /* Badges */
+    .badge-ghost {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #ef4444;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-real {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #22c55e;
+      font-weight: 700;
+    }
+
+    .badge-unscanned {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      font-weight: 600;
+    }
+
+    /* Buttons */
+    .btn-cyber-primary {
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      color: #ffffff !important;
+      font-weight: 700;
+      border: none;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+      transition: all 0.25s ease-in-out;
+    }
+
+    .btn-cyber-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+      color: #ffffff !important;
+    }
+
+    .btn-cyber-primary:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    /* Scanning Radar Effect */
+    .radar-scan-line {
+      height: 4px;
+      background: linear-gradient(90deg, transparent, #0284c7, transparent);
+      animation: radar-sweep 1.8s infinite linear;
+    }
+
+    @keyframes radar-sweep {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    /* Prize Chips */
+    .prize-chip {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.78rem;
+      color: #334155;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Explicit text color helper classes */
+    .text-dark-bold {
+      color: #0f172a !important;
+      font-weight: 700;
+    }
+
+    .text-dark-sub {
+      color: #334155 !important;
+    }
+
+    .text-dark-muted {
+      color: #475569 !important;
+    }

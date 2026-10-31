@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhantomID — The Synthetic Identity Hunter</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts: JetBrains Mono & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Custom Cyber-Fintech Styles -->
+  <link rel="stylesheet" href="/static/css/cyber.css?v=2">
+</head>
+
+<body>
+  <div id="app" class="container-fluid py-4 px-lg-5">
+    {% raw %}
+    <!-- Top System Telemetry Bar -->
+    <header
+      class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom border-secondary border-opacity-25">
+      <div>
+        <h1 class="h3 fw-bold mb-0 tracking-wide text-dark-bold font-monospace">
+          <i class="fa-solid fa-ghost brand-glow me-2"></i>PHANTOM<span class="brand-glow">ID</span>
+          <span
+            class="badge bg-light border border-primary border-opacity-50 text-primary font-monospace ms-2 fs-6">v1.0
+            GHOST-PROTOCOL</span>
+        </h1>
+        <p class="text-dark-muted small mb-0 font-monospace">
+          <i class="fa-solid fa-microchip me-1"></i> "Ghost in the Machine" — Autonomous Synthetic Identity Hunter
+        </p>
+      </div>
+
+      <!-- Live Stack Pills 
+      <div class="d-flex flex-wrap gap-2 align-items-center mt-2 mt-md-0">
+        <span class="prize-chip">
+          <i class="fa-solid fa-database text-primary"></i>
+          <span>Storage: <strong class="text-dark-bold">{{ storageEngine }}</strong></span>
+        </span>
+        <span class="prize-chip">
+          <i class="fa-solid fa-chart-line text-warning"></i>
+          <span>Engine 1: <strong class="text-dark-bold">TabPFN-3.5</strong></span>
+        </span>
+        <span class="prize-chip">
+          <i class="fa-solid fa-brain text-success"></i>
+          <span>Engine 2: <strong class="text-dark-bold">Gemma 2 (9B)</strong></span>
+        </span>
+        <span class="prize-chip">
+          <i class="fa-solid fa-tower-broadcast text-danger"></i>
+          <span>Voice: <strong class="text-dark-bold">ElevenLabs</strong></span>
+        </span>
+      </div> -->
+    </header>
+
+    <!-- Error Banner -->
+    <div v-if="errorMessage"
+      class="alert alert-danger glass-panel border-danger text-danger mb-4 d-flex align-items-center" role="alert">
+      <i class="fa-solid fa-triangle-exclamation fs-4 me-3 text-danger"></i>
+      <div class="fw-bold">{{ errorMessage }}</div>
+    </div>
+
+    <!-- KPI Metric Cards (4 Boxes) -->
+    <div class="row g-3 mb-4">
+      <!-- Box 1 -->
+      <div class="col-6 col-md-3">
+        <div class="glass-panel p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center text-dark-sub small font-monospace fw-bold">
+            <span>PROFILES MONITORED</span>
+            <i class="fa-solid fa-users text-primary fs-5"></i>
+          </div>
+          <div class="h2 fw-bold text-dark-bold mt-2 mb-0 font-monospace">{{ profiles.length }}</div>
+          <div class="small text-dark-muted mt-1 fw-semibold">Mock banking accounts</div>
+        </div>
+      </div>
+
+      <!-- Box 2 -->
+      <div class="col-6 col-md-3">
+        <div class="glass-panel p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center text-dark-sub small font-monospace fw-bold">
+            <span>REAL IDENTITIES</span>
+            <i class="fa-solid fa-shield-check text-success fs-5"></i>
+          </div>
+          <div class="h2 fw-bold text-success mt-2 mb-0 font-monospace">{{ realCount }}</div>
+          <div class="small text-success mt-1 fw-semibold">Verified human profiles</div>
+        </div>
+      </div>
+
+      <!-- Box 3 -->
+      <div class="col-6 col-md-3">
+        <div class="glass-panel p-3 h-100" :class="{ 'border-danger': ghostCount > 0 }">
+          <div class="d-flex justify-content-between align-items-center text-dark-sub small font-monospace fw-bold">
+            <span>SYNTHETIC GHOSTS</span>
+            <i class="fa-solid fa-skull-crossbones text-danger fs-5"></i>
+          </div>
+          <div class="h2 fw-bold text-danger mt-2 mb-0 font-monospace" :class="{ 'ghost-text-glow': ghostCount > 0 }">
+            {{ ghostCount }}
+          </div>
+          <div class="small text-danger mt-1 fw-bold" v-if="ghostCount > 0">
+            <i class="fa-solid fa-circle-exclamation me-1"></i> Quarantined by protocol
+          </div>
+          <div class="small text-dark-muted mt-1 fw-semibold" v-else>Awaiting AI audit</div>
+        </div>
+      </div>
+
+      <!-- Box 4 -->
+      <div class="col-6 col-md-3">
+        <div class="glass-panel p-3 h-100">
+          <div class="d-flex justify-content-between align-items-center text-dark-sub small font-monospace fw-bold">
+            <span>THREAT TELEMETRY</span>
+            <i class="fa-solid fa-radar text-warning fs-5"></i>
+          </div>
+          <div class="h4 fw-bold mt-2 mb-0 font-monospace" :class="ghostCount > 0 ? 'text-danger' : 'text-primary'">
+            <span v-if="summary">{{ summary.threat_level }}</span>
+            <span v-else>STANDBY</span>
+          </div>
+          <div class="small text-dark-bold mt-1 fw-bold" v-if="summary">
+            Scan latency: {{ summary.total_duration_ms }} ms
+          </div>
+          <div class="small text-dark-sub mt-1 fw-bold" v-else>Ready for scan</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action & Scan Controls -->
+    <div class="glass-panel p-3 mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div class="d-flex flex-wrap align-items-center gap-3">
+        <button class="btn btn-cyber-primary px-4 py-2 font-monospace" :disabled="loading" @click="runGhostProtocol">
+          <span v-if="loading">
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            EXECUTING GHOST PROTOCOL...
+          </span>
+          <span v-else>
+            <i class="fa-solid fa-bolt me-2"></i>RUN GHOST PROTOCOL
+          </span>
+        </button>
+
+        <button class="btn btn-outline-dark px-3 py-2 font-monospace fw-semibold" :disabled="resetting || loading"
+          @click="resetLedger">
+          <i class="fa-solid fa-rotate-left me-1"></i> Reset Ledger
+        </button>
+      </div>
+
+      <!-- Audio Telemetry Toggle -->
+      <div class="d-flex align-items-center gap-3">
+        <div class="form-check form-switch font-monospace small mb-0">
+          <input class="form-check-input" type="checkbox" role="switch" id="audioSwitch" v-model="audioEnabled">
+          <label class="form-check-label text-dark-bold fw-bold" for="audioSwitch">
+            <i class="fa-solid fa-volume-high me-1 text-primary" v-if="audioEnabled"></i>
+            <i class="fa-solid fa-volume-xmark me-1 text-secondary" v-else></i>
+            Voice Telemetry
+          </label>
+        </div>
+        <span v-if="audioPlaying" class="badge bg-danger text-white font-monospace">
+          <i class="fa-solid fa-broadcast-tower me-1"></i> BROADCASTING ALERT...
+        </span>
+      </div>
+    </div>
+
+    <!-- Active Scanning Radar Animation -->
+    <div v-if="loading"
+      class="mb-3 position-relative overflow-hidden rounded bg-light border border-primary border-opacity-50"
+      style="height: 6px;">
+      <div class="radar-scan-line position-absolute top-0 w-50 h-100"></div>
+    </div>
+
+    <!-- Identities Table -->
+    <div class="glass-panel p-3 mb-4 overflow-x-auto">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 text-dark-bold font-monospace mb-0">
+          <i class="fa-solid fa-table-list text-primary me-2"></i>Financial Identity Ledger
+        </h2>
+        <span class="text-dark-muted small font-monospace fw-semibold">Showing {{ profiles.length }} identities</span>
+      </div>
+
+      <table class="table table-cyber align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 50px;">ID</th>
+            <th scope="col">Identity & Account</th>
+            <th scope="col">Age</th>
+            <th scope="col">Work Tenure</th>
+            <th scope="col">Balance</th>
+            <th scope="col">Credit</th>
+            <th scope="col">TabPFN Anomaly</th>
+            <th scope="col">Gemma 2 Forensic Logic</th>
+            <th scope="col" class="text-end">Forensics</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="p in profiles" :key="p.id"
+            :class="{ 'row-ghost': p.verdict === 'Ghost', 'row-real': p.verdict === 'Real' }">
+
+            <!-- ID -->
+            <td class="font-monospace text-dark-muted fw-bold">#{{ String(p.id).padStart(2, '0') }}</td>
+
+            <!-- Name & Email (BLACK AND CRISP) -->
+            <td>
+              <div class="text-dark-bold fs-6">{{ p.name }}</div>
+              <div class="small text-dark-muted font-monospace">{{ p.email }}</div>
+            </td>
+
+            <!-- Age (BLACK AND CRISP) -->
+            <td class="font-monospace text-dark-bold">{{ p.age }} yrs</td>
+
+            <!-- Work Tenure (BLACK AND CRISP) -->
+            <td class="font-monospace text-dark-bold">{{ p.employment_years }} yrs</td>
+
+            <!-- Balance (BLACK OR RED IF NEGATIVE) -->
+            <td class="font-monospace fw-bold" :class="p.account_balance < 0 ? 'text-danger' : 'text-dark-bold'">
+              {{ formatCurrency(p.account_balance) }}
+            </td>
+
+            <!-- Credit Score -->
+            <td class="font-monospace">
+              <span class="badge" :class="p.credit_score >= 750 ? 'bg-success text-white' : 'bg-secondary text-white'">
+                {{ p.credit_score }}
+              </span>
+            </td>
+
+            <!-- TabPFN Score -->
+            <td class="font-monospace fw-bold">
+              <span v-if="p.status === 'Scanned'" :class="getAnomalyColor(p.anomaly_score)">
+                {{ (p.anomaly_score * 100).toFixed(0) }}% Anomaly
+              </span>
+              <span v-else class="text-dark-muted small">--</span>
+            </td>
+
+            <!-- Gemma Verdict & Logic -->
+            <td>
+              <div v-if="p.status === 'Scanned'">
+                <span class="badge mb-1" :class="p.verdict === 'Ghost' ? 'badge-ghost' : 'badge-real'">
+                  <i :class="p.verdict === 'Ghost' ? 'fa-solid fa-ghost me-1' : 'fa-solid fa-check me-1'"></i>
+                  {{ p.verdict }}
+                </span>
+                <p class="small text-dark-sub mb-0 text-truncate fw-medium" style="max-width: 320px;" :title="p.reason">
+                  {{ p.reason }}
+                </p>
+              </div>
+              <div v-else>
+                <span class="badge badge-unscanned font-monospace">Unscanned</span>
+              </div>
+            </td>
+
+            <!-- Forensic Inspect Button -->
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-primary font-monospace fw-bold" @click="openInspectModal(p)">
+                <i class="fa-solid fa-magnifying-glass-chart me-1"></i> Audit
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Forensic Detail Modal -->
+    <div class="modal fade" id="inspectModal" tabindex="-1" aria-labelledby="inspectModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content glass-panel border-primary border-opacity-50 text-dark-bold" v-if="selectedProfile">
+          <div class="modal-header border-secondary border-opacity-25 bg-light">
+            <h5 class="modal-title font-monospace text-dark-bold fw-bold" id="inspectModalLabel">
+              <i class="fa-solid fa-fingerprint text-primary me-2"></i>
+              Forensic Identity Dossier: {{ selectedProfile.name }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <div class="p-3 rounded bg-light border border-secondary border-opacity-25">
+                  <div class="text-dark-muted small font-monospace fw-bold">DEMOGRAPHIC DOSSIER</div>
+                  <div class="mt-2 text-dark-bold"><strong>Age:</strong> {{ selectedProfile.age }} years</div>
+                  <div class="text-dark-bold"><strong>Work Tenure:</strong> {{ selectedProfile.employment_years }} years
+                  </div>
+                  <div class="text-dark-bold"><strong>Chronological Gap:</strong> {{ selectedProfile.age -
+                    selectedProfile.employment_years }} years (Age at first job)</div>
+                  <div class="text-dark-muted"><strong>Email:</strong> <code>{{ selectedProfile.email }}</code></div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="p-3 rounded bg-light border border-secondary border-opacity-25">
+                  <div class="text-dark-muted small font-monospace fw-bold">FINANCIAL METRICS</div>
+                  <div class="mt-2 text-dark-bold"><strong>Account Balance:</strong> {{
+                    formatCurrency(selectedProfile.account_balance) }}</div>
+                  <div class="text-dark-bold"><strong>Credit Score:</strong> {{ selectedProfile.credit_score }}</div>
+                  <div>
+                    <strong>Status:</strong>
+                    <span class="badge ms-1"
+                      :class="selectedProfile.verdict === 'Ghost' ? 'bg-danger text-white' : 'bg-success text-white'">
+                      {{ selectedProfile.verdict || 'Unscanned' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Engine 1: TabPFN -->
+            <div class="p-3 rounded bg-warning bg-opacity-10 border border-warning mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-dark-bold small font-monospace fw-bold">
+                  <i class="fa-solid fa-chart-simple text-warning me-1"></i> ENGINE 1: PRIOR LABS TabPFN-3.5 TABULAR
+                  ANOMALY
+                </span>
+                <span class="badge bg-warning text-dark font-monospace fw-bold">
+                  Probability: {{ ((selectedProfile.anomaly_score || 0) * 100).toFixed(0) }}%
+                </span>
+              </div>
+              <p class="small text-dark-muted mt-2 mb-0">
+                TabPFN evaluated statistical distribution across
+                <code>[age, employment_years, balance, credit_score]</code> against multi-dimensional baseline
+                distributions.
+              </p>
+            </div>
+
+            <!-- Engine 2: Google Gemma 2 -->
+            <div class="p-3 rounded bg-info bg-opacity-10 border border-info">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-dark-bold small font-monospace fw-bold">
+                  <i class="fa-solid fa-brain text-primary me-1"></i> ENGINE 2: GOOGLE GEMMA 2 COGNITIVE DEDUCTION
+                </span>
+                <span class="badge"
+                  :class="selectedProfile.verdict === 'Ghost' ? 'bg-danger text-white' : 'bg-success text-white'">
+                  {{ selectedProfile.verdict || 'Pending' }}
+                </span>
+              </div>
+              <p class="text-dark-bold mt-2 mb-0 fw-semibold">
+                {{ selectedProfile.reason || 'Execute Ghost Protocol to run cognitive reasoning.' }}
+              </p>
+            </div>
+          </div>
+          <div class="modal-footer border-secondary border-opacity-25 bg-light">
+            <button type="button" class="btn btn-secondary font-monospace" data-bs-dismiss="modal">Close
+              Dossier</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prize Showcase & Architecture Footer 
+    <footer
+      class="mt-5 pt-4 border-top border-secondary border-opacity-25 text-dark-muted text-center small font-monospace">
+      <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+        <span class="prize-chip">🏆 Best Use of Gemma ($200)</span>
+        <span class="prize-chip">🏆 Best Use of TabPFN ($200)</span>
+        <span class="prize-chip">🏆 Best Use of Render ($200)</span>
+        <span class="prize-chip">🏆 Best MongoDB Atlas ($100)</span>
+        <span class="prize-chip">🏆 Best Sentry Agent Tracing ($100)</span>
+        <span class="prize-chip">🏆 Best ElevenLabs ($100)</span>
+        <span class="prize-chip">🏆 Best .tech Domain ($100)</span>
+      </div>
+      <div class="fw-semibold">PhantomID — Built for Hacktoberfest Week 4 "Ghost in the Machine"</div>
+    </footer> -->
+    {% endraw %}
+  </div>
+
+  <!-- Vue.js 3 via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.4.15/dist/vue.global.prod.js"></script>
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- PhantomID Vue App -->
+  <script src="/static/js/app.js"></script>
+</body>
+
+</html>
